@@ -10,6 +10,7 @@
 #include <sstream>
 #include <type_traits>
 #include <utility>
+#include <regex>
 
 #include <cm/iterator>
 #include <cm/memory>
@@ -1217,7 +1218,7 @@ void cmGlobalNinjaGenerator::AddAdditionalCleanFile(std::string fileName,
 
 void cmGlobalNinjaGenerator::AddCXXCompileCommand(
   const std::string& commandLine, const std::string& sourceFile,
-  const std::string& objPath)
+  const std::string& objPath, bool fixCompileCommands)
 {
   // Compute Ninja's build file path.
   std::string buildFileDir =
@@ -1235,6 +1236,18 @@ void cmGlobalNinjaGenerator::AddCXXCompileCommand(
       cm::make_unique<cmGeneratedFileStream>(buildFilePath);
     *this->CompileCommandsStream << "[\n";
   } else {
+    if (fixCompileCommands) {
+      const auto endsWith = [](const std::string& str, const std::string& suffix) {
+        if (suffix.size() > str.size()) {
+          return false;
+        }
+
+        return str.compare(str.size() - suffix.size(), suffix.size(), suffix) == 0;
+      };
+      if (endsWith(objPath, ".pch")) {
+        return;
+      }
+    }
     *this->CompileCommandsStream << ",\n";
   }
 
@@ -1244,12 +1257,27 @@ void cmGlobalNinjaGenerator::AddCXXCompileCommand(
       sourceFileName, this->GetCMakeInstance()->GetHomeOutputDirectory());
   }
 
+  const auto fixedCommandLine = [&]() {
+    if (fixCompileCommands) {
+      const std::regex pchIncludeRegex("-Winvalid-pch -Xclang -include-pch -Xclang [^ ]+\\.pch");
+      const std::regex stdRegex(R"(-std=c\+\+17)");
+      const std::regex coroutineTs("-fcoroutines-ts");
+
+      const auto strippedCommandLine = std::regex_replace(commandLine, pchIncludeRegex, "");
+      const auto replacedStdCxx17 = std::regex_replace(strippedCommandLine, stdRegex, "-std=c++20");
+      const auto replacedCoroutinesTs = std::regex_replace(replacedStdCxx17, coroutineTs, "");
+
+      return replacedCoroutinesTs;
+    }
+    return commandLine;
+  }();
+
   /* clang-format off */
   *this->CompileCommandsStream << "{\n"
      << R"(  "directory": ")"
      << cmGlobalGenerator::EscapeJSON(buildFileDir) << "\",\n"
      << R"(  "command": ")"
-     << cmGlobalGenerator::EscapeJSON(commandLine) << "\",\n"
+     << cmGlobalGenerator::EscapeJSON(fixedCommandLine) << "\",\n"
      << R"(  "file": ")"
      << cmGlobalGenerator::EscapeJSON(sourceFileName) << "\",\n"
      << R"(  "output": ")"

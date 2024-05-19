@@ -597,6 +597,9 @@ TargetProperty const StaticTargetProperties[] = {
   // Metadata
   { "CROSSCOMPILING_EMULATOR"_s, IC::ExecutableTarget },
   { "EXPORT_COMPILE_COMMANDS"_s, IC::CanCompileSources },
+  { "PLAYRIX_FIX_COMPILE_COMMANDS"_s, IC::CanCompileSources },
+  { "FOLDER"_s },
+  { "TEST_LAUNCHER"_s, IC::ExecutableTarget },
   { "FOLDER"_s },
   { "TEST_LAUNCHER"_s, IC::ExecutableTarget },
 
@@ -1865,6 +1868,7 @@ void cmTarget::CopyImportedCxxModulesProperties(cmTarget const* tgt)
     // Metadata
     "EchoString",
     "EXPORT_COMPILE_COMMANDS",
+    "PLAYRIX_FIX_COMPILE_COMMANDS",
     "FOLDER",
     "LABELS",
     "PROJECT_LABEL",

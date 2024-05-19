@@ -2351,8 +2351,10 @@ void cmNinjaTargetGenerator::ExportObjectCompileCommand(
   std::string cmdLine = this->GetLocalGenerator()->BuildCommandLine(
     compileCmds, outputConfig, outputConfig);
 
+  const auto fixCompileCommands = this->GeneratorTarget->GetPropertyAsBool("PLAYRIX_FIX_COMPILE_COMMANDS");
   this->GetGlobalGenerator()->AddCXXCompileCommand(cmdLine, sourceFileName,
-                                                   objectFileName);
+                                                   objectFileName,
+                                                   fixCompileCommands);
 }
 
 void cmNinjaTargetGenerator::ExportSwiftObjectCompileCommand(
@@ -2424,8 +2426,9 @@ void cmNinjaTargetGenerator::ExportSwiftObjectCompileCommand(
     std::string commandLine = this->GetLocalGenerator()->BuildCommandLine(
       compileCmds, outputConfig, outputConfig);
 
+    const auto fixCompileCommands = this->GeneratorTarget->GetPropertyAsBool("PLAYRIX_FIX_COMPILE_COMMANDS");
     this->GetGlobalGenerator()->AddCXXCompileCommand(
-      commandLine, sourceFilename, objectFilename);
+      commandLine, sourceFilename, objectFilename, fixCompileCommands);
   }
 }
 

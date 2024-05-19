@@ -300,7 +300,8 @@ public:
 
   void AddCXXCompileCommand(const std::string& commandLine,
                             const std::string& sourceFile,
-                            const std::string& objPath);
+                            const std::string& objPath,
+                            bool fixCompileCommands);
 
   /**
    * Add a rule to the generated build system.
