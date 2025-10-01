@@ -2435,6 +2435,7 @@ bool cmFindPackageCommand::SearchDirectory(std::string const& dir)
       return true;
     }
   }
+
   return false;
 }
 
